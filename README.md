@@ -1,5 +1,7 @@
 Convert Insomnia request data to Postman-compatible format  
   
+Main discussion: https://github.com/Kong/insomnia/issues/1156#issuecomment-780804602
+  
 Somewhat rudimentary right now (convertJsonFile.js)...  
 Runs with NodeJS  
 Currently it covers basic uses cases  
