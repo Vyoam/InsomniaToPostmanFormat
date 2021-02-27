@@ -1,5 +1,5 @@
-// todo remove extra maps[1]; try removing intermediate folders
-// todo keep order
+// todo remove extra maps[1]; try removing intermediate folders; multiple workspaces; environment
+// todo keep order; unhandled types of request data
 
 /*
 insomnia v4 json export...
