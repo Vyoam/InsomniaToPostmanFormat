@@ -3,6 +3,8 @@
 add a dummy req containing info and directions wrt the generator script, env. aspect etc.
 remove extra maps[1]; try removing intermediate folders
 keep order
+multiple workspaces; environment
+unhandled types of request data
 
  */
 
