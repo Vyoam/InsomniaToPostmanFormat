@@ -1,5 +1,10 @@
-// todo remove extra maps[1]; try removing intermediate folders
-// todo keep order
+/* todo
+
+add a dummy req containing info and directions wrt the generator script, env. aspect etc.
+remove extra maps[1]; try removing intermediate folders
+keep order
+
+ */
 
 /*
 insomnia v4 json export...
@@ -14,170 +19,159 @@ as per postman convention,. collections have only one top level folder ... so at
 
 // requisite: npm install uuid -g
 
-// https://tutorialedge.net/nodejs/reading-writing-files-with-nodejs/
-const fs = require("fs");
-const { v4: uuidv4 } = require('uuid')
+/*** *** ***/
 
-/* */
+// https://tutorialedge.net/nodejs/reading-writing-files-with-nodejs/
+// https://nodejs.org/api/fs.html#fs_fs_readfilesync_path_options
+const fs = require("fs");
+const {v4: uuidv4} = require('uuid')
+
+const inputFileName = process.argv.length > 2 ? process.argv[2] : "InsomniaRequests.json";
 
 function transformUrl(insomniaUrl) {
-  if(insomniaUrl==='') return {};
-  var postmanUrl = {};
-  postmanUrl.raw = insomniaUrl;
-  var urlParts = insomniaUrl.split(/\:\/\//);
-  if (urlParts[1]===undefined) {
-    urlParts.push(urlParts[0]);
-    urlParts[0]='http';
-  }
-  postmanUrl.protocol = urlParts[0];
-  // https://stackoverflow.com/questions/4607745/split-string-only-on-first-instance-of-specified-character
-  const hostAndPath = urlParts[1].split(/\/(.+)/);
-  postmanUrl.host = hostAndPath[0].split(/\./);
-  postmanUrl.path = hostAndPath[1]===undefined?[]:hostAndPath[1].split(/\//);
-  return postmanUrl;
+    if (insomniaUrl === '') return {};
+    var postmanUrl = {};
+    postmanUrl.raw = insomniaUrl;
+    var urlParts = insomniaUrl.split(/\:\/\//);
+    if (urlParts[1] === undefined) {
+        urlParts.push(urlParts[0]);
+        urlParts[0] = 'http';
+    }
+    postmanUrl.protocol = urlParts[0];
+    // https://stackoverflow.com/questions/4607745/split-string-only-on-first-instance-of-specified-character
+    const hostAndPath = urlParts[1].split(/\/(.+)/);
+    postmanUrl.host = hostAndPath[0].split(/\./);
+    postmanUrl.path = hostAndPath[1] === undefined ? [] : hostAndPath[1].split(/\//);
+    return postmanUrl;
 }
 
 function transformHeaders(insomniaHeaders) {
-  var outputHeaders = [];
-  insomniaHeaders.forEach(element => {
-    var header = {};
-    header.key = element.name;
-    header.value = element.value;
-    outputHeaders.push(header)
-  });
-  return outputHeaders;
+    var outputHeaders = [];
+    insomniaHeaders.forEach(element => {
+        var header = {};
+        header.key = element.name;
+        header.value = element.value;
+        outputHeaders.push(header)
+    });
+    return outputHeaders;
 }
 
 function transformBody(insomniaBody) {
-  var body = {};
-  switch (insomniaBody.mimeType) {
-    case "":
-      body.mode = "raw";
-      body.raw = insomniaBody.text;
-      break;
-    default:
-      console.error("unsupported body type: " + insomniaBody.mimeType);
-  }
-  return body;
+    var body = {};
+    switch (insomniaBody.mimeType) {
+        case "":
+            body.mode = "raw"; // to do - check if non-'text' cases need to be handled here; will also handled /json etc. getting skipped
+            body.raw = insomniaBody.text;
+            break;
+        default:
+            console.error("unsupported body type: " + insomniaBody.mimeType + '...' + insomniaBody.text);
+    }
+    return body;
 }
 
 function transformItem(insomniaItem) {
-  var postmanItem = {};
-  postmanItem.name = insomniaItem.name;
-  var request = {};
-  request.method = insomniaItem.method;
-  request.header = transformHeaders(insomniaItem.headers);
-  //todo cover url params and url encoded form too... auth cases... check mimeType and process accordingly
-  request.body = transformBody(insomniaItem.body);
-  request.url = transformUrl(insomniaItem.url);
-  postmanItem.request = request;
-  postmanItem.response = [];
-  return postmanItem;
+    var postmanItem = {};
+    postmanItem.name = insomniaItem.name;
+    var request = {};
+    request.method = insomniaItem.method;
+    request.header = transformHeaders(insomniaItem.headers);
+    // todo cover url params and url encoded form too... auth cases... check mimeType and process accordingly
+    request.body = transformBody(insomniaItem.body);
+    request.url = transformUrl(insomniaItem.url);
+    postmanItem.request = request;
+    postmanItem.response = [];
+    return postmanItem;
 }
 
 const rootId = "d1097c3b-2011-47a4-8f95-87b8f4b54d6d"; // unique guid for root
 
 function generateMaps(insomniaParentChildList) {
-  var parentChildrenMap = new Map();
-  var flatMap = new Map();
-  insomniaParentChildList.forEach(element => {
-    flatMap.set(element._id, element);
-    switch (element._type) {
-      case "workspace":
-        // only one workspace to be selected (the last one which comes up here)
-        var elementArray = [];
-        elementArray.push(element);
-        parentChildrenMap.set(rootId, elementArray); // in any case will select the top workspace when creating tree
-        break;
-      case "request":
-        var elementArray = parentChildrenMap.get(element.parentId);
-        if (elementArray === undefined) elementArray = [];
-        elementArray.push(element);
-        parentChildrenMap.set(element.parentId, elementArray);
-        break;
-      case "request_group":
-        var elementArray = parentChildrenMap.get(element.parentId);
-        if (elementArray === undefined) elementArray = [];
-        elementArray.push(element);
-        parentChildrenMap.set(element.parentId, elementArray);
-        break;
-      default:
-        console.error("unsupported item type: " + element._type);
-    }
-  });
-  const maps = [parentChildrenMap, flatMap];
-  return maps;
+    var parentChildrenMap = new Map();
+    var flatMap = new Map();
+    insomniaParentChildList.forEach(element => {
+        flatMap.set(element._id, element);
+        switch (element._type) {
+            case "workspace":
+                // 'bug': only one workspace to be selected (the last one which comes up here)
+                var elementArray = [];
+                elementArray.push(element);
+                parentChildrenMap.set(rootId, elementArray); // in any case will select the top workspace when creating tree
+                break;
+            case "request":
+                var elementArray = parentChildrenMap.get(element.parentId);
+                if (elementArray === undefined) elementArray = [];
+                elementArray.push(element);
+                parentChildrenMap.set(element.parentId, elementArray);
+                break;
+            case "request_group":
+                var elementArray = parentChildrenMap.get(element.parentId);
+                if (elementArray === undefined) elementArray = [];
+                elementArray.push(element);
+                parentChildrenMap.set(element.parentId, elementArray);
+                break;
+            default:
+                console.error("unsupported item type: " + element._type);
+        }
+    });
+    const maps = [parentChildrenMap, flatMap];
+    return maps;
 }
 
 function generateTreeRecursively(element, parentChildrenMap) {
-  var postmanItem = {};
-  switch (element._type) {
-    case "request_group":
-      postmanItem.name = element.name;
-      postmanItem.item = [];
-      parentChildrenMap.get(element._id).forEach(child => {
-        postmanItem.item.push(generateTreeRecursively(child, parentChildrenMap));
-      });
-      break;
-    case "request":
-      postmanItem = transformItem(element);
-      break;
-    default:
-      console.error("unsupported item type: " + element._type);
-  }
-  return postmanItem;
+    var postmanItem = {};
+    switch (element._type) {
+        case "request_group":
+            postmanItem.name = element.name;
+            postmanItem.item = [];
+            parentChildrenMap.get(element._id).forEach(child => {
+                postmanItem.item.push(generateTreeRecursively(child, parentChildrenMap));
+            });
+            break;
+        case "request":
+            postmanItem = transformItem(element);
+            break;
+        default:
+            console.error("unsupported item type: " + element._type);
+    }
+    return postmanItem;
 }
 
 function getSubItemTrees(parentChildrenMap) {
-  var subItemTrees = [];
-  var roots = parentChildrenMap.get(rootId);
-  parentChildrenMap.get(roots[0]._id).forEach(element => {
-    subItemTrees.push(generateTreeRecursively(element, parentChildrenMap))
-  });
-  return subItemTrees;
+    var subItemTrees = [];
+    var roots = parentChildrenMap.get(rootId);
+    parentChildrenMap.get(roots[0]._id).forEach(element => {
+        subItemTrees.push(generateTreeRecursively(element, parentChildrenMap))
+    });
+    return subItemTrees;
 }
 
 function transformData(inputDataString) {
 
-  var inputData = JSON.parse(inputDataString);
-  var outputData = {
-    "info": {
-      "_postman_id": "",
-      "name": "",
-      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-    },
-    "item": [
-    ]
-  };
+    var inputData = JSON.parse(inputDataString);
+    var outputData = {
+        "info": {
+            "_postman_id": "",
+            "name": "",
+            "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+        },
+        "item": []
+    };
 
-  outputData.info._postman_id = uuidv4();
+    outputData.info._postman_id = uuidv4();
 
-  var maps = generateMaps(inputData.resources);
-  var parentChildrenMap = maps[0];
-  var flatMap = maps[1];
+    var maps = generateMaps(inputData.resources);
+    var parentChildrenMap = maps[0];
+    var flatMap = maps[1];
 
-  const subItems = getSubItemTrees(parentChildrenMap);
-  outputData.item.push(...subItems);
+    const subItems = getSubItemTrees(parentChildrenMap);
+    outputData.item.push(...subItems);
 
-  outputData.info.name = "UnnamedPostmanCollection";
+    outputData.info.name = inputFileName.slice(0, -5); // assuming extension is .json
 
-  return JSON.stringify(outputData);
+    return JSON.stringify(outputData);
 
 }
 
-const stepWriteAfterRead = (err) => {
-  if (err) {
-    console.log(err);
-  }
-  console.log("Successfully Written to File.");
-};
-
-const stepReadFile = (err, data) => {
-  if (err) {
-    console.log(err)
-  }
-  const newData = transformData(data);
-  fs.writeFile("output.json", newData, stepWriteAfterRead);
-}
-
-fs.readFile("input.json", "utf-8", stepReadFile);
+const data = fs.readFileSync(inputFileName, "utf-8");
+const newData = transformData(data);
+fs.writeFileSync(inputFileName.slice(0, -5)+"PostmanCollection.json", newData);
