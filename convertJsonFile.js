@@ -4,6 +4,7 @@
 * add a dummy req containing info and directions wrt the generator script, env. aspect etc.
 * keep order
 * unhandled types of request data
+* 'Docs' export
 * multiple workspaces; environment
 * remove extra maps[1]; try removing intermediate folders
 
