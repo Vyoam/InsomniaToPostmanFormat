@@ -1,25 +1,26 @@
 /* todo
 
-add a dummy req containing info and directions wrt the generator script, env. aspect etc.
-remove extra maps[1]; try removing intermediate folders
-keep order
-multiple workspaces; environment
-unhandled types of request data
+* auth
+* add a dummy req containing info and directions wrt the generator script, env. aspect etc.
+* keep order
+* unhandled types of request data
+* multiple workspaces; environment
+* remove extra maps[1]; try removing intermediate folders
 
- */
-
-/*
-insomnia v4 json export...
-assume your own simple use case...
-a bunch of requests put inside a folder, to be exported as a postman collection
-as per postman convention,. collections have only one top level folder ... so at top level name cud be take from user ... for now will put a default
 */
 
-// https://github.com/Kong/insomnia/issues/1156 ; postman schema
+/* relevant notes
 
-// har as input wud be more stable but doesn't have folder support - i.e. batch import works, but no folders... openapi spec? - can't have hierarchy in that ... ideally wud add all this code to insomnia internally ... or allow plugin for export import ... but i think ultimately this wud be an ongoing process with the shifting insomnia-postman internal code and format
+* postman schema: https://schema.postman.com (v2.1.0 relevant here)
+* insomnia schema:
+            code: https://github.com/Kong/insomnia/tree/develop/packages/insomnia-app/app/models
+            documentation i found: https://support.insomnia.rest/article/172-importing-and-exporting-data (doesn't seem to be fully in sync. e.g. authentication.type isn't mentioned as of 14May2021)
+* postman vs insomnia: as per postman convention, collections have only one top level folder
+* har as input wud be more stable as opposed to postman collection schema but doesn't have folder support - i.e. batch import works, but no folders
+* openapi spec as input? can't have folders/hierarchy in that tho.
+* wud target to add this export functionality to insomnia itself; plugin approach might be good too
 
-// requisite: npm install uuid -g
+*/
 
 /*** *** ***/
 
@@ -28,7 +29,11 @@ as per postman convention,. collections have only one top level folder ... so at
 const fs = require("fs");
 const {v4: uuidv4} = require('uuid')
 
-const inputFileName = process.argv.length > 2 ? process.argv[2] : "InsomniaRequests.json";
+const inputFileName = process.argv.length > 2 ? process.argv[2] : undefined;
+if(inputFileName === undefined) {
+    console.error("Input file not provided!!! Exiting.");
+    return;
+}
 
 function transformUrl(insomniaUrl) {
     if (insomniaUrl === '') return {};
@@ -62,11 +67,27 @@ function transformBody(insomniaBody) {
     var body = {};
     switch (insomniaBody.mimeType) {
         case "":
-            body.mode = "raw"; // to do - check if non-'text' cases need to be handled here; will also handled /json etc. getting skipped
+        case "application/json":
+        case "application/xml":
+            body.mode = "raw";
             body.raw = insomniaBody.text;
             break;
+        case "multipart/form-data":
+            body.mode = "formdata";
+            body.formdata = []
+            insomniaBody.params.forEach(param => {
+                body.formdata.push({key: param.name, value: param.value})
+            });
+            break;
+        case "application/x-www-form-urlencoded":
+            body.mode = "urlencoded"
+            body.urlencoded = []
+            insomniaBody.params.forEach(param => {
+                body.urlencoded.push({key: param.name, value: param.value})
+            });
+            break;
         default:
-            console.error("unsupported body type: " + insomniaBody.mimeType + '...' + insomniaBody.text);
+            console.error("Body type unsupported; skipped!!! ... " + insomniaBody.mimeType);
     }
     return body;
 }
@@ -77,9 +98,23 @@ function transformItem(insomniaItem) {
     var request = {};
     request.method = insomniaItem.method;
     request.header = transformHeaders(insomniaItem.headers);
-    // todo cover url params and url encoded form too... auth cases... check mimeType and process accordingly
-    request.body = transformBody(insomniaItem.body);
+    if ( Object.keys(insomniaItem.body).length !== 0 ) {
+        request.body = transformBody(insomniaItem.body);
+    }
     request.url = transformUrl(insomniaItem.url);
+    if (insomniaItem.parameters) {
+        if(request.url.raw.includes("?")) {
+            console.error("Query params detected in both the raw query and the 'parameters' object of Insomnia request!!! Exported Postman collection may need manual editing for erroneous '?' in url.");
+        }
+        request.url.query = [];
+        insomniaItem.parameters.forEach(param => {
+            request.url.query.push({key: param.name, value: param.value})
+        });
+    }
+    request.auth = {}; // todo
+    if ( Object.keys(insomniaItem.authentication).length !== 0 ) {
+        console.error("Auth param export not yet supported!!!");
+    }
     postmanItem.request = request;
     postmanItem.response = [];
     return postmanItem;
@@ -112,7 +147,7 @@ function generateMaps(insomniaParentChildList) {
                 parentChildrenMap.set(element.parentId, elementArray);
                 break;
             default:
-                console.error("unsupported item type: " + element._type);
+                console.error("Item type unsupported; skipped!!! ... " + element._type);
         }
     });
     const maps = [parentChildrenMap, flatMap];
@@ -133,7 +168,7 @@ function generateTreeRecursively(element, parentChildrenMap) {
             postmanItem = transformItem(element);
             break;
         default:
-            console.error("unsupported item type: " + element._type);
+            console.error("Item type unsupported; skipped!!! ... " + element._type);
     }
     return postmanItem;
 }
@@ -176,4 +211,4 @@ function transformData(inputDataString) {
 
 const data = fs.readFileSync(inputFileName, "utf-8");
 const newData = transformData(data);
-fs.writeFileSync(inputFileName.slice(0, -5)+"PostmanCollection.json", newData);
+fs.writeFileSync(inputFileName.slice(0, -5) + "PostmanCollection.json", newData);
