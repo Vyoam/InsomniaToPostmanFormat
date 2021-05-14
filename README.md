@@ -8,9 +8,8 @@ npm install
 node convertJsonFile.js <Insomnia Requests Export json File>
 ```
 
-Somewhat rudimentary right now (convertJsonFile.js)...  
 Runs with NodeJS  
-Currently it covers basic uses cases
+Currently it covers most, but not all, use cases (see todo section in convertJsonFile.js)
 Input = Insomnia export json; Output = Postman collection json (having a name ending with PostmanCollection.json)
 Tested with: node = v10.23.0; npm = 6.14.8 (I know... I am stuck with the older ones due to my codebase)  
 
