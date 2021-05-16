@@ -16,6 +16,7 @@
 * insomnia schema:
             code: https://github.com/Kong/insomnia/tree/develop/packages/insomnia-app/app/models
             documentation i found: https://support.insomnia.rest/article/172-importing-and-exporting-data (doesn't seem to be fully in sync. e.g. authentication.type isn't mentioned as of 14May2021)
+* Postman to Insomnia: https://github.com/Kong/insomnia/blob/develop/packages/insomnia-importers/src/importers/postman.ts
 * postman vs insomnia: as per postman convention, collections have only one top level folder
 * har as input wud be more stable as opposed to postman collection schema but doesn't have folder support - i.e. batch import works, but no folders
 * openapi spec as input? can't have folders/hierarchy in that tho.
