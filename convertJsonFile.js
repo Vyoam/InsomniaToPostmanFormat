@@ -16,11 +16,22 @@
 * insomnia schema:
             code: https://github.com/Kong/insomnia/tree/develop/packages/insomnia-app/app/models
             documentation i found: https://support.insomnia.rest/article/172-importing-and-exporting-data (doesn't seem to be fully in sync. e.g. authentication.type isn't mentioned as of 14May2021)
-* Postman to Insomnia: https://github.com/Kong/insomnia/blob/develop/packages/insomnia-importers/src/importers/postman.ts
+* Postman to Insomnia:
+    https://github.com/Kong/insomnia/blob/develop/packages/insomnia-importers/src/importers/postman.ts
+    packages/insomnia-app/app/common/import.ts
+        importRaw
 * postman vs insomnia: as per postman convention, collections have only one top level folder
 * har as input wud be more stable as opposed to postman collection schema but doesn't have folder support - i.e. batch import works, but no folders
 * openapi spec as input? can't have folders/hierarchy in that tho.
 * wud target to add this export functionality to insomnia itself; plugin approach might be good too
+    packages/insomnia-app/app/ui/redux/modules/global.tsx
+        exportWorkspacesToFile
+        exportRequestsToFile
+        showSelectExportTypeModal
+    packages/insomnia-app/app/common/import.ts
+        exportRequestsHAR
+    packages/insomnia-app/app/common/har.ts
+        exportHarWithRenderedRequest
 
 */
 
