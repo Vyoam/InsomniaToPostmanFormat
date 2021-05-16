@@ -18,4 +18,4 @@ Tested with: node = v10.23.0; npm = 6.14.8 (I know... I am stuck with the older 
 
 ---
 
-P.S. I have observed that for small amount of requests, copying individually through curl format is good enough. Though, it doesn't capture the request name. You don't have to be logged into Postman and expose your data either.
+P.S. I have observed that for small amount of requests, copying individually through curl format is good enough. You don't have to be logged into Postman and expose your data either. Though, it doesn't capture the request name.
