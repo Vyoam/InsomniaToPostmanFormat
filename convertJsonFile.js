@@ -3,8 +3,8 @@
 * auth
 * multiple workspaces; environment
 * keep order
-* unhandled types of request data (yaml, edn and graph query)
 * 'Docs' export
+* unhandled types of request data (yaml, edn and graph query)
 * add a dummy req containing info and directions wrt the generator script, env. aspect etc.
 * remove extra maps[1]; try removing intermediate folders
 
@@ -95,6 +95,9 @@ function transformBody(insomniaBody) {
             break;
         default:
             console.error("Body type unsupported; skipped!!! ... " + insomniaBody.mimeType);
+            body.mode = "raw";
+            body.raw = "github.com/Vyoam/InsomniaToPostmanFormat: Unsupported body type "+insomniaBody.mimeType;
+            break;
     }
     return body;
 }
