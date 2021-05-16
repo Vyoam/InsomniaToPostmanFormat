@@ -1,11 +1,11 @@
 /* todo
 
 * auth
-* add a dummy req containing info and directions wrt the generator script, env. aspect etc.
-* keep order
-* unhandled types of request data (yaml, edn, graph query and file)
-* 'Docs' export
 * multiple workspaces; environment
+* keep order
+* unhandled types of request data (yaml, edn and graph query)
+* 'Docs' export
+* add a dummy req containing info and directions wrt the generator script, env. aspect etc.
 * remove extra maps[1]; try removing intermediate folders
 
 */
@@ -75,17 +75,23 @@ function transformBody(insomniaBody) {
             break;
         case "multipart/form-data":
             body.mode = "formdata";
-            body.formdata = []
+            body.formdata = [];
             insomniaBody.params.forEach(param => {
-                body.formdata.push({key: param.name, value: param.value})
+                body.formdata.push({key: param.name, value: param.value});
             });
             break;
         case "application/x-www-form-urlencoded":
-            body.mode = "urlencoded"
-            body.urlencoded = []
+            body.mode = "urlencoded";
+            body.urlencoded = [];
             insomniaBody.params.forEach(param => {
-                body.urlencoded.push({key: param.name, value: param.value})
+                body.urlencoded.push({key: param.name, value: param.value});
             });
+            break;
+        case "application/octet-stream":
+            body.mode = "file";
+            body.file = {};
+            body.file.src = "/C:/PleaseSelectAFile";
+            console.log("A file is supposed to be a part of the request!!! Would need to be manually selected in Postman.");
             break;
         default:
             console.error("Body type unsupported; skipped!!! ... " + insomniaBody.mimeType);
@@ -109,7 +115,7 @@ function transformItem(insomniaItem) {
         }
         request.url.query = [];
         insomniaItem.parameters.forEach(param => {
-            request.url.query.push({key: param.name, value: param.value})
+            request.url.query.push({key: param.name, value: param.value});
         });
     }
     request.auth = {}; // todo
@@ -212,4 +218,4 @@ function transformData(inputDataString) {
 
 const data = fs.readFileSync(inputFileName, "utf-8");
 const newData = transformData(data);
-fs.writeFileSync(inputFileName.slice(0, -5) + "PostmanCollection.json", newData);
+fs.writeFileSync(inputFileName.slice(0, -5) + ".postman_collection.json", newData);

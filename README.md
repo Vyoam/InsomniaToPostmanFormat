@@ -12,7 +12,7 @@ Runs with NodeJS
 
 Currently it covers most, but not all, use cases (see todo section in convertJsonFile.js)
 
-Input = Insomnia export json; Output = Postman collection json (having a name ending with PostmanCollection.json)
+Input = Insomnia export json; Output = Postman collection json (output file name is the input file name suffixed with .postman_collection.json)
 
 Tested with: node = v10.23.0; npm = 6.14.8 (I know... I am stuck with the older ones due to my codebase)  
 
