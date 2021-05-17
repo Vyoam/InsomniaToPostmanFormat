@@ -1,7 +1,7 @@
 /* todo
 
 * auth
-* multiple workspaces; environment
+* multiple workspaces; environments; cookies
 * keep order
 * 'Docs' export
 * unhandled types of request data (yaml, edn and graph query)
@@ -21,8 +21,8 @@
     packages/insomnia-app/app/common/import.ts
         importRaw
 * postman vs insomnia: as per postman convention, collections have only one top level folder
-* har as input wud be more stable as opposed to postman collection schema but doesn't have folder support - i.e. batch import works, but no folders
-* openapi spec as input? can't have folders/hierarchy in that tho.
+* har as output wud be more stable as opposed to postman collection schema but doesn't have folder support - i.e. batch import works, but no folders
+* openapi spec as output? can't have folders/hierarchy in that tho.
 * wud target to add this export functionality to insomnia itself; plugin approach might be good too
     packages/insomnia-app/app/ui/redux/modules/global.tsx
         exportWorkspacesToFile
@@ -32,6 +32,7 @@
         exportRequestsHAR
     packages/insomnia-app/app/common/har.ts
         exportHarWithRenderedRequest
+   P.S.: As mentioned in the discussion (https://github.com/Kong/insomnia/issues/1156#issuecomment-780804602) this PR (https://github.com/Kong/insomnia/pull/1433) has done some similar work, but is missing some items (particularly sub-folders, auth). But can serve as a good reference.
 
 */
 
