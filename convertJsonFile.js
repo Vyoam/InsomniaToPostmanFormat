@@ -45,7 +45,7 @@ const {v4: uuidv4} = require('uuid')
 
 const inputFileName = process.argv.length > 2 ? process.argv[2] : undefined;
 if(inputFileName === undefined) {
-    console.error("Input file not provided!!! Exiting.");
+    console.error("Error: Input file not provided!!! Exiting.");
     return;
 }
 
@@ -104,10 +104,10 @@ function transformBody(insomniaBody) {
             body.mode = "file";
             body.file = {};
             body.file.src = "/C:/PleaseSelectAFile";
-            console.log("A file is supposed to be a part of the request!!! Would need to be manually selected in Postman.");
+            console.warn("Warning: A file is supposed to be a part of the request!!! Would need to be manually selected in Postman.");
             break;
         default:
-            console.error("Body type unsupported; skipped!!! ... " + insomniaBody.mimeType);
+            console.warn("Warning: Body type unsupported; skipped!!! ... " + insomniaBody.mimeType);
             body.mode = "raw";
             body.raw = "github.com/Vyoam/InsomniaToPostmanFormat: Unsupported body type "+insomniaBody.mimeType;
             break;
@@ -126,8 +126,8 @@ function transformItem(insomniaItem) {
     }
     request.url = transformUrl(insomniaItem.url);
     if (insomniaItem.parameters) {
-        if(request.url.raw.includes("?")) {
-            console.error("Query params detected in both the raw query and the 'parameters' object of Insomnia request!!! Exported Postman collection may need manual editing for erroneous '?' in url.");
+        if(request.url.raw !== undefined && request.url.raw.includes("?")) {
+            console.warn("Warning: Query params detected in both the raw query and the 'parameters' object of Insomnia request!!! Exported Postman collection may need manual editing for erroneous '?' in url.");
         }
         request.url.query = [];
         insomniaItem.parameters.forEach(param => {
@@ -136,7 +136,7 @@ function transformItem(insomniaItem) {
     }
     request.auth = {}; // todo
     if ( Object.keys(insomniaItem.authentication).length !== 0 ) {
-        console.error("Auth param export not yet supported!!!");
+        console.warn("Warning: Auth param export not yet supported!!!");
     }
     postmanItem.request = request;
     postmanItem.response = [];
@@ -170,7 +170,7 @@ function generateMaps(insomniaParentChildList) {
                 parentChildrenMap.set(element.parentId, elementArray);
                 break;
             default:
-                console.error("Item type unsupported; skipped!!! ... " + element._type);
+                console.warn("Warning: Item type unsupported; skipped!!! ... " + element._type);
         }
     });
     const maps = [parentChildrenMap, flatMap];
@@ -191,7 +191,7 @@ function generateTreeRecursively(element, parentChildrenMap) {
             postmanItem = transformItem(element);
             break;
         default:
-            console.error("Item type unsupported; skipped!!! ... " + element._type);
+            console.warn("Warning: Item type unsupported; skipped!!! ... " + element._type);
     }
     return postmanItem;
 }
