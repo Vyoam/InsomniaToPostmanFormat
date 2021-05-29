@@ -1,6 +1,6 @@
 # InsomniaToPostmanFormat
-Convert Insomnia request data to Postman-compatible format  
-  
+Convert Insomnia request data to Postman-compatible format
+
 Main discussion: https://github.com/Kong/insomnia/issues/1156#issuecomment-780804602
   
 ```
@@ -11,6 +11,8 @@ node convertJsonFile.js <Insomnia Requests Export json File>
 Runs with NodeJS
 
 Currently it covers most, but not all, use cases (see todo section in convertJsonFile.js)
+
+**Note: I'm working to integrate this directly to Insomnia ... https://github.com/Vyoam/insomnia/commits/feature/postman-export**
 
 Input = Insomnia export json; Output = Postman collection json (output file name is the input file name suffixed with .postman_collection.json)
 
