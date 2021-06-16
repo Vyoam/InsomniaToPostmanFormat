@@ -125,7 +125,7 @@ function transformItem(insomniaItem) {
         request.body = transformBody(insomniaItem.body);
     }
     request.url = transformUrl(insomniaItem.url);
-    if (insomniaItem.parameters) {
+    if (insomniaItem.parameters && insomniaItem.parameters.size > 0) {
         if(request.url.raw !== undefined && request.url.raw.includes("?")) {
             console.warn("Warning: Query params detected in both the raw query and the 'parameters' object of Insomnia request!!! Exported Postman collection may need manual editing for erroneous '?' in url.");
         }
