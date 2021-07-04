@@ -46,7 +46,7 @@ const {v4: uuidv4} = require('uuid')
 const inputFileName = process.argv.length > 2 ? process.argv[2] : undefined;
 if(inputFileName === undefined) {
     console.error("Error: Input file not provided!!! Exiting.");
-    return;
+    process.exit(1);
 }
 
 function transformUrl(insomniaUrl) {
@@ -54,13 +54,18 @@ function transformUrl(insomniaUrl) {
     var postmanUrl = {};
     postmanUrl.raw = insomniaUrl;
     var urlParts = insomniaUrl.split(/\:\/\//);
-    if (urlParts[1] === undefined) {
-        urlParts.push(urlParts[0]);
-        urlParts[0] = 'http';
+    var rawHostAndPath;
+    if (urlParts.length === 1) {
+        rawHostAndPath=urlParts[0];
+    } else if (urlParts.length === 2){
+        postmanUrl.protocol = urlParts[0];
+        rawHostAndPath=urlParts[1];
+    } else {
+        console.error("Error: Unexpected number of components found in the URL string. Exiting.");
+        process.exit(3);
     }
-    postmanUrl.protocol = urlParts[0];
     // https://stackoverflow.com/questions/4607745/split-string-only-on-first-instance-of-specified-character
-    const hostAndPath = urlParts[1].split(/\/(.+)/);
+    const hostAndPath = rawHostAndPath.split(/\/(.+)/);
     postmanUrl.host = hostAndPath[0].split(/\./);
     postmanUrl.path = hostAndPath[1] === undefined ? [] : hostAndPath[1].split(/\//);
     return postmanUrl;
@@ -125,7 +130,7 @@ function transformItem(insomniaItem) {
         request.body = transformBody(insomniaItem.body);
     }
     request.url = transformUrl(insomniaItem.url);
-    if (insomniaItem.parameters && insomniaItem.parameters.size > 0) {
+    if (insomniaItem.parameters && insomniaItem.parameters.length > 0) {
         if(request.url.raw !== undefined && request.url.raw.includes("?")) {
             console.warn("Warning: Query params detected in both the raw query and the 'parameters' object of Insomnia request!!! Exported Postman collection may need manual editing for erroneous '?' in url.");
         }
@@ -211,7 +216,7 @@ function transformData(inputDataString) {
 
     if(inputData.__export_format!==4) {
         console.error("Error: Version (__export_format "+inputData.__export_format+") not supported. Only version 4 is supported.");
-        process.exit(1);
+        process.exit(2);
     }
 
     var outputData = {
