@@ -208,6 +208,12 @@ function getSubItemTrees(parentChildrenMap) {
 function transformData(inputDataString) {
 
     var inputData = JSON.parse(inputDataString);
+
+    if(inputData.__export_format!==4) {
+        console.error("Error: Version (__export_format "+inputData.__export_format+") not supported. Only version 4 is supported.");
+        process.exit(1);
+    }
+
     var outputData = {
         "info": {
             "_postman_id": "",
