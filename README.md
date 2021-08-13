@@ -12,7 +12,7 @@ Runs with NodeJS
 
 Currently it covers most, but not all, use cases (see todo section in convertJsonFile.js)
 
-**Note: I'm working to integrate this directly to Insomnia ... https://github.com/Vyoam/insomnia/commits/feature/postman-export**
+**Note: The plugin is now available (npm publish pending)... https://github.com/Vyoam/insomnia-plugin-postman-export; Insomnia team recommended the plugin approach when I raised the PR for direct integration.**
 
 Input = Insomnia export json; Output = Postman collection json (output file name is the input file name suffixed with .postman_collection.json)
 
