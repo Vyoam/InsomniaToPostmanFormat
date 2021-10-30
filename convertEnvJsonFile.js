@@ -25,14 +25,11 @@ function flatObject(parentKey, jsonObject) {
         }
     });
 
-    return flatted
+    return flatted;
 }
 
 function generateMaps(insomniaEnvVars) {
-    var parentChildrenMap = new Map();
-    var flatMap = new Map();
-
-    return flatObject('', insomniaEnvVars)
+    return flatObject('', insomniaEnvVars);
 }
 
 function transformData(environmentName, inputDataString) {
