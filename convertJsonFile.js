@@ -132,6 +132,7 @@ function transformItem(insomniaItem) {
     var postmanItem = {};
     postmanItem.name = insomniaItem.name;
     var request = {};
+    request.description = insomniaItem.description;
     request.method = insomniaItem.method;
     request.header = transformHeaders(insomniaItem.headers);
     if ( Object.keys(insomniaItem.body).length !== 0 ) {
