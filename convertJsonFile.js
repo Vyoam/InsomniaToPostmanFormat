@@ -3,7 +3,6 @@
 * auth
 * multiple workspaces; environments; cookies
 * keep order
-* 'Docs' export
 * unhandled types of request data (yaml and edn query)
 * add a dummy req containing info and directions wrt the generator script, env. aspect etc.
 * remove extra maps[1]; try removing intermediate folders
